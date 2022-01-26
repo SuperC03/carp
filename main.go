@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
-	"github.com/superc03/research_survey/handlers"
+	"github.com/superc03/carp/handlers"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
@@ -20,6 +20,9 @@ import (
 // Embeded Content
 //go:embed templates/*
 var templates embed.FS
+
+//go:embed static/*
+var static embed.FS
 
 var (
 	host         string
@@ -77,13 +80,20 @@ func main() {
 	if err != nil {
 		l.Fatal("Could not connect to MongoDB", zap.Error(err))
 	}
+	err = db.Ping(dbContext, nil)
+	if err != nil {
+		l.Fatal("Could not connect to MongoDB", zap.Error(err))
+	}
 
 	// Initialize Routes
 	sm := mux.NewRouter()
 
-	ah := handlers.NewHome(l, db, sess, &templates, googleKey, googleSecret, sessionKey, host, port)
+	ah := handlers.NewHome(l, db.Database("carp"), sess, &templates, googleKey, googleSecret, sessionKey, host, port)
 	sm.HandleFunc("/", ah.LandingPage).Methods(http.MethodGet)
 	sm.HandleFunc("/auth", ah.GoogleAuth).Methods(http.MethodGet)
+
+	fileServer := http.FileServer(http.FS(static))
+	sm.PathPrefix("/static").Handler(http.StripPrefix("/", fileServer))
 
 	// Start HTTP Server
 	s := http.Server{

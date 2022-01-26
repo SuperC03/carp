@@ -1,15 +1,22 @@
 package handlers
 
 import (
-	"crypto/rand"
+	"context"
 	"embed"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/superc03/carp/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2"
@@ -18,7 +25,7 @@ import (
 
 type Home struct {
 	l         *zap.Logger
-	db        *mongo.Client
+	db        *mongo.Database
 	conf      *oauth2.Config
 	sess      *sessions.CookieStore
 	templates *embed.FS
@@ -26,7 +33,7 @@ type Home struct {
 
 func NewHome(
 	l *zap.Logger,
-	db *mongo.Client,
+	db *mongo.Database,
 	sess *sessions.CookieStore,
 	templates *embed.FS,
 	googleKey string,
@@ -51,7 +58,7 @@ func (h *Home) LandingPage(w http.ResponseWriter, r *http.Request) {
 	// Create token to protect against CSRF attacks mid-signin
 	randToken := randStateToken()
 	// Assign the "mysterious" user a session
-	newSession, err := h.sess.Get(r, "research_survey_session")
+	newSession, err := h.sess.Get(r, "carp")
 	if err != nil {
 		http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
 		return
@@ -70,7 +77,7 @@ func (h *Home) LandingPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
-	session, err := h.sess.Get(r, "research_survey_session")
+	session, err := h.sess.Get(r, "carp")
 	if err != nil {
 		http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
 		return
@@ -91,9 +98,78 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer email.Body.Close()
-	data, _ := ioutil.ReadAll(email.Body)
-	h.l.Info("Email Login", zap.String("email", string(data)))
-	w.Write(data)
+	googleData, err := parseGoogleData(email.Body)
+	if err != nil {
+		http.Error(w, "Authorization Unsuccessful", http.StatusBadRequest)
+		return
+	}
+	// Confirm student is use `student.dodea.edu` account
+	if googleData["hd"] != "student.dodea.edu" {
+		//TODO Reditect User to Account Warning Page
+	}
+	// Check if User Already Exists
+	mongoContext, mongoCancel := context.WithTimeout(r.Context(), time.Second*5)
+	defer mongoCancel()
+	var userId primitive.ObjectID
+	res := h.db.Collection("users").FindOne(mongoContext, bson.M{"email": googleData["email"]})
+	if res.Err() == mongo.ErrNoDocuments {
+		newUser := models.User{
+			Email:      googleData["email"].(string),
+			IsAdmin:    false,
+			SurveyType: imageGroup(),
+			Data:       primitive.M{},
+			CreatedOn:  time.Now(),
+			UpdatedOn:  time.Now(),
+		}
+		res, err := h.db.Collection("users").InsertOne(mongoContext, newUser)
+		if err != nil {
+			h.l.Error("Could not inset new user into database", zap.Error(err))
+			http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
+			return
+		}
+		userId = res.InsertedID.(primitive.ObjectID)
+	} else if res.Err() != nil {
+		if err != nil {
+			h.l.Error("Could not search for user in database", zap.Error(err))
+			http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		user := models.User{}
+		err = res.Decode(&user)
+		if err != nil {
+			h.l.Error("Unable to convert user from database record to object", zap.Error(err))
+			http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
+			return
+		}
+		userId = user.ID
+	}
+	// Assign a session token
+	session.Values["_id"] = userId.String()
+	err = session.Save(r, w)
+	if err != nil {
+		h.l.Error("Unable to assign session token to user", zap.Error(err))
+		http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/survey/start", http.StatusFound)
+}
+
+func imageGroup() int {
+	return rand.Intn(2)
+}
+
+func parseGoogleData(res io.ReadCloser) (map[string]interface{}, error) {
+	data, err := ioutil.ReadAll(res)
+	if err != nil {
+		return nil, err
+	}
+	output := make(map[string]interface{})
+	if err = json.Unmarshal(data, &output); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return output, nil
 }
 
 func randStateToken() string {

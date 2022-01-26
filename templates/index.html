@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/build.css">
     <title>Colin Clark's AP Research Survey</title>
 </head>
+
 <body>
-    <h1>Welcome to Colin Clark's AP Research Survey</h1>
-    <a href="{{ .GoogleLoginURL }}">Login with Google</a>
+    <div class="w-full h-screen flex flex-col bg-slate-100 dark:bg-gray-900 items-center justify-center">
+        <h1 class="text-6xl sm:text-8xl text-gray-800 font-medium dark:text-white">C.A.R.P.</h1>
+        <h2 class="text-xl sm:text-2xl font-normal text-gray-600 dark:text-white italic"><b
+                class="text-purple-700">C</b>olin's <b class="text-purple-700">A</b>P <b
+                class="text-purple-700">R</b>esearch <b class="text-purple-700">P</b>latform</h2>
+        <a href="{{ .GoogleLoginURL }}"
+            class="bg-purple-700 mt-8 px-6 py-4 rounded-2xl text-white text-lg font-medium font-sans hover:shadow-lg transition-shadow">Login
+            with Google</a>
+    </div>
 </body>
+
 </html>

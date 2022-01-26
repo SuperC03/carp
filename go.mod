@@ -1,4 +1,4 @@
-module github.com/superc03/research_survey
+module github.com/superc03/carp
 
 go 1.16
 
