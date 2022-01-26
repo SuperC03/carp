@@ -1,0 +1,4 @@
+.env
+node_modules/
+*.exe
+env.ps1
