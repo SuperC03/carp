@@ -88,9 +88,16 @@ func main() {
 	// Initialize Routes
 	sm := mux.NewRouter()
 
-	ah := handlers.NewHome(l, db.Database("carp"), sess, &templates, googleKey, googleSecret, sessionKey, host, port)
-	sm.HandleFunc("/", ah.LandingPage).Methods(http.MethodGet)
-	sm.HandleFunc("/auth", ah.GoogleAuth).Methods(http.MethodGet)
+	hh := handlers.NewHome(l, db.Database("carp"), sess, &templates, googleKey, googleSecret, sessionKey, host, port)
+	sm.HandleFunc("/", hh.LandingPage).Methods(http.MethodGet)
+	sm.HandleFunc("/auth", hh.GoogleAuth).Methods(http.MethodGet)
+
+	sh := handlers.NewSurvey(l, db.Database("carp"), sess, &templates)
+	surveyRouter := sm.PathPrefix("/survey").Subrouter()
+	surveyRouter.HandleFunc("/start", sh.StartPage).Methods(http.MethodGet)
+
+	oh := handlers.NewOther(&templates)
+	sm.HandleFunc("/wrong_account", oh.WrongAccountPage).Methods(http.MethodGet)
 
 	fileServer := http.FileServer(http.FS(static))
 	sm.PathPrefix("/static").Handler(http.StripPrefix("/", fileServer))

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/build.css">
     <title>Colin Clark's AP Research Survey</title>
 </head>
 <body>
@@ -31,7 +32,7 @@
             <h3 class="text-md dark:text-white">3. Click the "Submit" button to move on to the next question, if avalible. Your answer will be saved.</h3>
           </article>
         </section>
-        <a href="{{ .GoogleLoginURL }}" class="bg-purple-700 mt-8 px-6 py-4 rounded-2xl text-white text-lg font-medium font-sans hover:shadow-lg transition-shadow">Start the Survey</a>
+        <a href="{{ .NextQuestionPath }}" class="bg-purple-700 mt-8 px-6 py-4 rounded-2xl text-white text-lg font-medium font-sans hover:shadow-lg transition-shadow">Start the Survey</a>
       </div>
 </body>
 </html>

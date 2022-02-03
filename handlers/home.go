@@ -63,11 +63,12 @@ func (h *Home) LandingPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
 		return
 	}
+	// TODO Conditional Render 'Login with Google' or 'Continue Survey' depending on logged in status
 	newSession.Values["state"] = randToken
 	newSession.Save(r, w)
 	loginURL := h.conf.AuthCodeURL(randToken)
-	t := template.Must(template.New("landing-page").ParseFS(*h.templates, "templates/index.html"))
-	err = t.ExecuteTemplate(w, "index.html", struct {
+	t := template.Must(template.New("landing-page").ParseFS(*h.templates, "templates/home.html"))
+	err = t.ExecuteTemplate(w, "home.html", struct {
 		GoogleLoginURL string
 	}{GoogleLoginURL: loginURL})
 	if err != nil {
@@ -105,7 +106,7 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// Confirm student is use `student.dodea.edu` account
 	if googleData["hd"] != "student.dodea.edu" {
-		//TODO Reditect User to Account Warning Page
+		http.Redirect(w, r, "/wrong_account", http.StatusFound)
 	}
 	// Check if User Already Exists
 	mongoContext, mongoCancel := context.WithTimeout(r.Context(), time.Second*5)
@@ -145,7 +146,7 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 		userId = user.ID
 	}
 	// Assign a session token
-	session.Values["_id"] = userId.String()
+	session.Values["_id"] = userId.Hex()
 	err = session.Save(r, w)
 	if err != nil {
 		h.l.Error("Unable to assign session token to user", zap.Error(err))
