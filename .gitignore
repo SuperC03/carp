@@ -2,3 +2,4 @@
 node_modules/
 *.exe
 env.ps1
+static/build.css

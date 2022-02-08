@@ -94,7 +94,9 @@ func main() {
 
 	sh := handlers.NewSurvey(l, db.Database("carp"), sess, &templates)
 	surveyRouter := sm.PathPrefix("/survey").Subrouter()
+	surveyRouter.Use(sh.UserMiddleware)
 	surveyRouter.HandleFunc("/start", sh.StartPage).Methods(http.MethodGet)
+	surveyRouter.HandleFunc("/{code}", sh.QuestionPage).Methods(http.MethodGet, http.MethodPost)
 
 	oh := handlers.NewOther(&templates)
 	sm.HandleFunc("/wrong_account", oh.WrongAccountPage).Methods(http.MethodGet)

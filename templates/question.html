@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/build.css">
+    <title>Colin Clark's AP Research Survey | Question</title>
+</head>
+
+<body>
+    <form
+        class="w-full h-screen px-6 py-16 flex flex-col bg-slate-100 dark:bg-gray-900 items-center justify-center text-center"
+        method="POST"
+        action="/survey/{{ .NextPath }}"
+        >
+        {{ if .UserImageShown }}
+        <input type="hidden" name="articleID" value="{{ .ArticleID }}">
+        <img src="http://drive.google.com/uc?id={{ .ArticlePictureCode }}"
+            alt="Six 'new citizens' urinate on the Christian church. Disrespectful and sad. I'm speechless."
+            class="rounded-2xl mb-8 max-w-2xl w-full shadow-sm" />
+        {{ end }}
+        <h1 class="max-w-2xl italic text-2xl sm:text-4xl text-gray-800 font-medium dark:text-white">{{ .ArticleHeadline }}
+        </h1>
+        <div class="flex flex-row flex-nowrap justify-evenly">
+            {{ range .LikenScaleValues }}
+            <div class="flex flex-col my-8 px-3 mx-2">
+                <input required type="radio" id="score{{ . }}" name="score" value="{{ . }}"
+                    class="w-6 h-6 mb-1 border-2 dark:border-4 border-gray-800 dark:border-white appearance-none checked:bg-purple-700 checked:border-purple-700 bg-no-repeat bg-center bg-contain focus:outline-none transition duration-200 rounded-full cursor-pointer" />
+                <label for="score{{ . }}" class="text-gray-800 text-xl font-medium dark:text-white cursor-pointer">{{ .
+                    }}</label>
+            </div>
+            {{ end }}
+        </div>
+        <div class="flex flex-row justify-between w-full max-w-2xl">
+            <a href="#" class="px-5 py-4 bg-gray-400 text-white text-lg sm:text-xl rounded-l-full w-1/2">Return to
+                Instructions</a>
+            <button type="submit" href="#" class="px-5 py-4 bg-purple-600 text-white text-lg sm:text-xl rounded-r-full w-1/2">Continue</button>
+        </div>
+    </form>
+</body>
+
+</html>

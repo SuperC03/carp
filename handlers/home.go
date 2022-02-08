@@ -107,6 +107,7 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 	// Confirm student is use `student.dodea.edu` account
 	if googleData["hd"] != "student.dodea.edu" {
 		http.Redirect(w, r, "/wrong_account", http.StatusFound)
+		return
 	}
 	// Check if User Already Exists
 	mongoContext, mongoCancel := context.WithTimeout(r.Context(), time.Second*5)

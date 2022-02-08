@@ -12,7 +12,6 @@ import (
 // ExtractUserID takes request and response objects along with gorilla session object to extract mongo ID from cookies.
 // Errors if unable to extract ObjectID for whatever reason.
 func ExtractUserID(
-	w http.ResponseWriter,
 	r *http.Request,
 	sess *sessions.CookieStore,
 ) (*primitive.ObjectID, error) {
