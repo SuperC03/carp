@@ -3,7 +3,7 @@
 # Build Go Program
 FROM golang:1.16-alpine AS build
 
-WORKDIR /app
+WORKDIR /go/src/github.com/superc03/carp
 
 # Install Dependencies
 COPY go.mod ./
