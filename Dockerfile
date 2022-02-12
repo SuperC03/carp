@@ -17,7 +17,6 @@ COPY models/ ./models
 COPY static/ ./static
 COPY templates/ ./templates
 
-RUN go install
 RUN go build module github.com/superc03/carp -o /carp
 
 # Deploy on Lighter Device
