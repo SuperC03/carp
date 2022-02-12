@@ -8,7 +8,7 @@ WORKDIR /app
 # Install Dependencies
 COPY go.mod ./
 COPY go.sum ./
-RUN go mod download
+RUN go mod download && go mod verify
 
 # Transfer Source Files
 COPY *.go ./
@@ -17,7 +17,7 @@ COPY models/ ./models
 COPY static/ ./static
 COPY templates/ ./templates
 
-RUN go build module github.com/superc03/carp -o /carp
+RUN go build github.com/superc03/carp -v -o /carp
 
 # Deploy on Lighter Device
 FROM gcr.io/distroless/base-debian10
