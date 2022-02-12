@@ -21,8 +21,8 @@ type User struct {
 	UpdatedOn  time.Time          `bson:"updated_on,omitempty"`
 }
 
-func (u *User) NextArticlePath(ctx context.Context, db *mongo.Database) (string, error) {
-	articleIDs, err := u.RemainingArticles(ctx, db)
+func (u *User) NextArticlePath(ctx context.Context, db *mongo.Database, notIncluding *primitive.ObjectID) (string, error) {
+	articleIDs, err := u.RemainingArticles(ctx, db, notIncluding)
 	if err != nil {
 		return "", err
 	}
@@ -32,18 +32,21 @@ func (u *User) NextArticlePath(ctx context.Context, db *mongo.Database) (string,
 	return articleIDs[rand.Intn(len(articleIDs))].Hex(), nil
 }
 
-func (u *User) RemainingArticles(ctx context.Context, db *mongo.Database) ([]primitive.ObjectID, error) {
+func (u *User) RemainingArticles(ctx context.Context, db *mongo.Database, notIncluding *primitive.ObjectID) ([]primitive.ObjectID, error) {
 	var (
 		completedIDs        = make([]primitive.ObjectID, 0)
 		remainingArticleIDs = make([]primitive.ObjectID, 0)
 	)
-	for k, _ := range u.Data {
+	for k := range u.Data {
 		id, err := primitive.ObjectIDFromHex(k)
 		if err != nil {
 			return nil, err
 		}
 		completedIDs = append(completedIDs, id)
 
+	}
+	if notIncluding != nil {
+		completedIDs = append(completedIDs, *notIncluding)
 	}
 	cur, err := db.Collection("articles").Find(ctx, bson.M{"_id": bson.M{"$nin": completedIDs}})
 	if err != nil {

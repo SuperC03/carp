@@ -113,6 +113,7 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 	mongoContext, mongoCancel := context.WithTimeout(r.Context(), time.Second*5)
 	defer mongoCancel()
 	var userId primitive.ObjectID
+	user := models.User{}
 	res := h.db.Collection("users").FindOne(mongoContext, bson.M{"email": googleData["email"]})
 	if res.Err() == mongo.ErrNoDocuments {
 		newUser := models.User{
@@ -137,7 +138,6 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		user := models.User{}
 		err = res.Decode(&user)
 		if err != nil {
 			h.l.Error("Unable to convert user from database record to object", zap.Error(err))
@@ -148,13 +148,18 @@ func (h *Home) GoogleAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// Assign a session token
 	session.Values["_id"] = userId.Hex()
+	session.Values["state"] = ""
 	err = session.Save(r, w)
 	if err != nil {
 		h.l.Error("Unable to assign session token to user", zap.Error(err))
 		http.Error(w, "An Unknown Error Has Occured, Please Try Again Later", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/survey/start", http.StatusFound)
+	if user.IsAdmin {
+		http.Redirect(w, r, "/statistics.csv", http.StatusFound)
+	} else {
+		http.Redirect(w, r, "/survey/start", http.StatusFound)
+	}
 }
 
 func imageGroup() int {

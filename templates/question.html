@@ -12,16 +12,15 @@
 <body>
     <form
         class="w-full h-screen px-6 py-16 flex flex-col bg-slate-100 dark:bg-gray-900 items-center justify-center text-center"
-        method="POST"
-        action="/survey/{{ .NextPath }}"
-        >
-        {{ if .UserImageShown }}
+        method="POST" action="/survey/{{ .NextPath }}">
         <input type="hidden" name="articleID" value="{{ .ArticleID }}">
+        {{ if .UserImageShown }}
         <img src="http://drive.google.com/uc?id={{ .ArticlePictureCode }}"
             alt="Six 'new citizens' urinate on the Christian church. Disrespectful and sad. I'm speechless."
             class="rounded-2xl mb-8 max-w-2xl w-full shadow-sm" />
         {{ end }}
-        <h1 class="max-w-2xl italic text-2xl sm:text-4xl text-gray-800 font-medium dark:text-white">{{ .ArticleHeadline }}
+        <h1 class="max-w-2xl italic text-2xl sm:text-4xl text-gray-800 font-medium dark:text-white">{{ .ArticleHeadline
+            }}
         </h1>
         <div class="flex flex-row flex-nowrap justify-evenly">
             {{ range .LikenScaleValues }}
@@ -34,9 +33,10 @@
             {{ end }}
         </div>
         <div class="flex flex-row justify-between w-full max-w-2xl">
-            <a href="#" class="px-5 py-4 bg-gray-400 text-white text-lg sm:text-xl rounded-l-full w-1/2">Return to
+            <a href="/survey/start" class="px-5 py-4 bg-gray-400 text-white text-lg sm:text-xl rounded-l-full w-1/2">Return to
                 Instructions</a>
-            <button type="submit" href="#" class="px-5 py-4 bg-purple-600 text-white text-lg sm:text-xl rounded-r-full w-1/2">Continue</button>
+            <button type="submit" href="#"
+                class="px-5 py-4 bg-purple-600 text-white text-lg sm:text-xl rounded-r-full w-1/2">Continue</button>
         </div>
     </form>
 </body>

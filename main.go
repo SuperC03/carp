@@ -64,6 +64,7 @@ func main() {
 	// Initialize Sessions
 	sess := &sessions.CookieStore{
 		Options: &sessions.Options{
+			Path:     "/",
 			HttpOnly: true,
 			Secure:   true,
 			SameSite: http.SameSiteDefaultMode,
@@ -96,10 +97,14 @@ func main() {
 	surveyRouter := sm.PathPrefix("/survey").Subrouter()
 	surveyRouter.Use(sh.UserMiddleware)
 	surveyRouter.HandleFunc("/start", sh.StartPage).Methods(http.MethodGet)
+	surveyRouter.HandleFunc("/complete", sh.CompletePage).Methods(http.MethodGet, http.MethodPost)
 	surveyRouter.HandleFunc("/{code}", sh.QuestionPage).Methods(http.MethodGet, http.MethodPost)
 
-	oh := handlers.NewOther(&templates)
+	oh := handlers.NewOther(l, &templates, db.Database("carp"))
 	sm.HandleFunc("/wrong_account", oh.WrongAccountPage).Methods(http.MethodGet)
+	statsRouter := sm.PathPrefix("/statistics.csv").Subrouter()
+	statsRouter.Use(sh.UserMiddleware)
+	statsRouter.HandleFunc("", oh.StatisticsPage)
 
 	fileServer := http.FileServer(http.FS(static))
 	sm.PathPrefix("/static").Handler(http.StripPrefix("/", fileServer))
@@ -118,6 +123,7 @@ func main() {
 			l.Fatal("A fatal server error has occured", zap.Error(err))
 		}
 	}()
+	l.Info("Server Started")
 	// Handle Graceful Server Shutdown
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, os.Interrupt, os.Kill)
