@@ -17,6 +17,7 @@ COPY models/ ./models
 COPY static/ ./static
 COPY templates/ ./templates
 
+RUN go install
 RUN go build -o /carp
 
 # Deploy on Lighter Device
