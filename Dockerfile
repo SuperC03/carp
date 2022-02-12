@@ -18,7 +18,7 @@ COPY static/ ./static
 COPY templates/ ./templates
 
 RUN go install
-RUN go build -o /carp
+RUN go build module github.com/superc03/carp -o /carp
 
 # Deploy on Lighter Device
 FROM gcr.io/distroless/base-debian10
