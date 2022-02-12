@@ -20,7 +20,7 @@ jobs:
         run: yarn install
       - name: Build Tailwind CSS
         run: yarn build
-  docker:
+  build_docker:
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
