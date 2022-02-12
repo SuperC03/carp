@@ -29,11 +29,11 @@ jobs:
       - name: Verify Go Dependencies
         run: go mod verify
       - name: Build Go Server
-        run: go build -v -o /carp
+        run: go build -v -o ./carp
       - name: Deploy to Docker registry
         uses: docker/build-push-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: wilsontanwm/gosimple
+          repository: superc03/carp
           tag_with_ref: true
