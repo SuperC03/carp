@@ -86,7 +86,12 @@ func (o *Other) StatisticsPage(w http.ResponseWriter, r *http.Request) {
 			data = append(data, "false")
 		}
 		for _, v := range articleIDs {
-			data = append(data, fmt.Sprintf("%d", user.Data[v]))
+			score := user.Data[v]
+			if score == nil {
+				data = append(data, "")
+			} else {
+				data = append(data, fmt.Sprintf("%d", user.Data[v]))
+			}
 		}
 		err := csvWriter.Write(data)
 		if err != nil {

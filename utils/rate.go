@@ -10,9 +10,7 @@ import (
 )
 
 func SubmitRating(ctx context.Context, db *mongo.Database, userID primitive.ObjectID, articleID primitive.ObjectID, score int) error {
-	res, err := db.Collection("users").UpdateByID(ctx, userID, bson.D{
-		{"$set", bson.D{{"survey_data." + articleID.Hex(), score}}},
-	})
+	res, err := db.Collection("users").UpdateByID(ctx, userID, bson.M{"$set": bson.M{"survey_data." + articleID.Hex(): score}})
 	if err != nil {
 		return err
 	}

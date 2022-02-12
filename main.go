@@ -35,13 +35,13 @@ var (
 
 func init() {
 	if port = os.Getenv("PORT"); port == "" {
-		panic("Environmental variable `HOST has not been set.`")
+		panic("Environmental variable `PORT` has not been set.")
 	}
 	if host = os.Getenv("HOST"); host == "" {
 		host = "localhost"
 	}
 	if dbUrl = os.Getenv("MONGODB_URL"); dbUrl == "" {
-		panic("Environmental variable `MONGODB_URL has not been set.`")
+		panic("Environmental variable `MONGODB_URL` has not been set.")
 	}
 	if sessionKey = os.Getenv("SESSION_KEY"); sessionKey == "" {
 		panic("Enviornmental variable `SESSION_KEY` has not been set.")
@@ -111,7 +111,7 @@ func main() {
 
 	// Start HTTP Server
 	s := http.Server{
-		Addr:         port,
+		Addr:         ":" + port,
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
