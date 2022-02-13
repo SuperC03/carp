@@ -44,7 +44,7 @@ func NewHome(
 	conf := &oauth2.Config{
 		ClientID:     googleKey,
 		ClientSecret: googleSecret,
-		RedirectURL:  fmt.Sprintf("http://%s/auth", host),
+		RedirectURL:  fmt.Sprintf("https://%s/auth", host),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.profile",
 			"https://www.googleapis.com/auth/userinfo.email",
