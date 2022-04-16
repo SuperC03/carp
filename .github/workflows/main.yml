@@ -29,7 +29,7 @@ jobs:
       - name: Verify Go Dependencies
         run: go mod verify
       - name: Build Go Server
-        run: go build -v -o /carp
+        run: go build -v -o ./carp
       - name: Deploy to Docker registry
         uses: docker/build-push-action@v1
         with:
